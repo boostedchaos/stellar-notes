@@ -66,7 +66,7 @@ a cloud service.
   outbound connections** (netstat-sampled during a packaged E2E run).
 - Cloud credentials live in the OS keychain; the renderer never sees them.
 
-![Desktop work-mode note — LOCAL ONLY](screenshots/desktop-2-workmode.png)
+![Desktop work-mode note — LOCAL ONLY](screenshots/desktop-workmode.png)
 
 ## Structured summaries without a parser fight
 
@@ -79,10 +79,14 @@ exactly the same shapes (a node test asserts the parity). See
 
 ## Screenshots
 
-| iOS | Desktop |
+| iOS — structured summary | Desktop — diarized meeting |
 |---|---|
-| ![notes](screenshots/ios-2-notes-folders.png) | ![console](screenshots/desktop-1-console.png) |
-| ![summary](screenshots/ios-3-note-summary.png) | ![settings](screenshots/desktop-4-settings.png) |
+| ![summary](screenshots/ios-3-note-summary.png) | ![console](screenshots/desktop-console-meeting.png) |
+
+Cloud is explicit, never implicit — a note that opted into cloud shows its
+engine and model in the telemetry line:
+
+![Desktop cloud opt-in note](screenshots/desktop-cloud-optins.png)
 
 All screenshots show seeded demo data from the project's evidence harness.
 

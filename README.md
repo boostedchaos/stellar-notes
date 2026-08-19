@@ -15,6 +15,10 @@ zero backend.
 | **Backend** | None — local-first architecture |
 | **Search** | SQLite FTS5 over every spoken word, summary, decision, and open question |
 
+![Desktop console — diarized meeting with local summary](screenshots/desktop-console-meeting.png)
+*The desktop "orbital console": a diarized meeting transcript with speaker
+labels, processed and summarized entirely on device.*
+
 ![iOS record screen](screenshots/ios-1-record-home.png)
 
 ## Architecture
@@ -104,6 +108,20 @@ All screenshots show seeded demo data from the project's evidence harness.
   legitimate first-run model download isn't killed mid-fetch.
 - **Import hardening**: DoS budgets, atomic persistence, and a summary-only
   fallback for malformed archives.
+- **System-audio meeting capture** (macOS): microphone + system loopback
+  mixed in-renderer into one recording, so both sides of a Mac-based call are
+  transcribed. Degrades gracefully to mic-only — with a visible "MIC ONLY"
+  chip — when loopback can't be acquired, and detects the granted-but-silent
+  permission case rather than recording nothing.
+- **Adaptive speaker-count diarization**: no fixed clustering threshold works
+  across meeting-room and call audio, so the sidecar walks a descending
+  threshold ladder until a minimum speaker count is met (a meeting is never
+  one person), then merges down when the user pins an exact count.
+- **Deterministic quality gate + versioned builds**: committed lint config
+  (warnings fail), a single `verify` gate (lint + both test suites +
+  typecheck) wired to pre-push, and every build stamped with its git commit
+  and build date — shown in About and Settings, so a running copy can always
+  be traced to the exact tree that produced it.
 - Windows port implemented against the same contracts — platform-branched
   process handling (tree-kill semantics, platform-aware hotkey defaults) with
   the full test suite green on Windows.

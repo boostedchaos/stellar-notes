@@ -88,8 +88,26 @@ export function asrBinaryPath(): string {
   return process.env.STELLAR_ASR_BIN ?? defaultBinary();
 }
 
-function invocation(wavPath: string, asrOnly: boolean): { command: string; args: string[] } {
-  const flags = asrOnly ? ['--asr-only'] : [];
+/**
+ * The MEETING diarization speaker directive, echoed straight to the sidecar:
+ *   'auto'  → --min-speakers 2  (a meeting has ≥2 people; auto-detect above that)
+ *   2..6    → --speakers N      (exactly N)
+ * Memos (--asr-only) never diarize, so they get NO speaker flags.
+ */
+export type SpeakerMode = 'auto' | number;
+
+function speakerFlags(mode: SpeakerMode | undefined): string[] {
+  if (mode === undefined) return [];
+  if (mode === 'auto') return ['--min-speakers', '2'];
+  return ['--speakers', String(mode)];
+}
+
+function invocation(
+  wavPath: string,
+  asrOnly: boolean,
+  speakers?: SpeakerMode,
+): { command: string; args: string[] } {
+  const flags = asrOnly ? ['--asr-only'] : speakerFlags(speakers);
   const override = process.env.STELLAR_ASR_CMD;
   if (override) {
     const argv = JSON.parse(override) as string[];
@@ -130,7 +148,13 @@ export function isModelDownloadLine(line: string): boolean {
  */
 export function startAsr(
   wavPath: string,
-  opts?: { asrOnly?: boolean; onProgress?: (phase: 'downloading_models') => void },
+  opts?: {
+    asrOnly?: boolean;
+    /** MEETING only: 'auto' (--min-speakers 2) or an exact count (--speakers N).
+     *  Ignored when asrOnly (memos never diarize). */
+    speakers?: SpeakerMode;
+    onProgress?: (phase: 'downloading_models') => void;
+  },
 ): {
   handle: SidecarHandle;
   result: Promise<AsrOutput>;
@@ -150,7 +174,7 @@ export function startAsr(
     };
   }
 
-  const { command, args } = invocation(wavPath, asrOnly);
+  const { command, args } = invocation(wavPath, asrOnly, opts?.speakers);
   const isOverride = !!process.env.STELLAR_ASR_CMD;
   // Windows (non-test): run the wrapper via Electron-as-Node and point its model
   // cache at the app's real userData dir. Under the test override we keep the
